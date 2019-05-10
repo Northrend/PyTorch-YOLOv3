@@ -12,8 +12,8 @@ from utils.parse_config import *
 from utils.utils import build_targets
 from collections import defaultdict
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+# import matplotlib.pyplot as plt
+# import matplotlib.patches as patches
 
 
 def create_modules(module_defs):
@@ -152,7 +152,6 @@ class YOLOLayer(nn.Module):
 
         # Training
         if targets is not None:
-
             if x.is_cuda:
                 self.mse_loss = self.mse_loss.cuda()
                 self.bce_loss = self.bce_loss.cuda()
@@ -173,11 +172,12 @@ class YOLOLayer(nn.Module):
 
             nProposals = int((pred_conf > 0.5).sum().item())
             recall = float(nCorrect / nGT) if nGT else 1
-            precision = float(nCorrect / nProposals)
+            precision = float(nCorrect / (nProposals + 1e-16))
 
             # Handle masks
             mask = Variable(mask.type(ByteTensor))
             conf_mask = Variable(conf_mask.type(ByteTensor))
+            # print("=> mask:\n", mask)
 
             # Handle target variables
             tx = Variable(tx.type(FloatTensor), requires_grad=False)
@@ -194,6 +194,8 @@ class YOLOLayer(nn.Module):
             # Mask outputs to ignore non-existing objects
             loss_x = self.mse_loss(x[mask], tx[mask])
             loss_y = self.mse_loss(y[mask], ty[mask])
+            # print("=> x[mask], tx[mask]:\n", x[mask], "\n", tx[mask])
+            # print("=> w[mask], tw[mask]:\n", w[mask], "\n", tw[mask])
             loss_w = self.mse_loss(w[mask], tw[mask])
             loss_h = self.mse_loss(h[mask], th[mask])
             loss_conf = self.bce_loss(pred_conf[conf_mask_false], tconf[conf_mask_false]) + self.bce_loss(

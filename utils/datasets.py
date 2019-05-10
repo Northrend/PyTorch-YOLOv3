@@ -47,10 +47,11 @@ class ImageFolder(Dataset):
 
 
 class ListDataset(Dataset):
-    def __init__(self, list_path, img_size=416):
+    def __init__(self, list_path, img_dir, ann_dir, img_size=416):
         with open(list_path, 'r') as file:
             self.img_files = file.readlines()
-        self.label_files = [path.replace('images', 'labels').replace('.png', '.txt').replace('.jpg', '.txt') for path in self.img_files]
+        self.label_files = [os.path.join(ann_dir, x.strip().replace('.png', '.txt').replace('.jpg', '.txt')) for x in self.img_files]
+        self.img_files = [os.path.join(img_dir, x.strip()) for x in self.img_files]
         self.img_shape = (img_size, img_size)
         self.max_objects = 50
 
@@ -114,6 +115,7 @@ class ListDataset(Dataset):
         if labels is not None:
             filled_labels[range(len(labels))[:self.max_objects]] = labels[:self.max_objects]
         filled_labels = torch.from_numpy(filled_labels)
+        # print("=> filled_labels:", filled_labels)
 
         return img_path, input_img, filled_labels
 

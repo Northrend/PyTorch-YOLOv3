@@ -48,6 +48,8 @@ classes = load_classes(opt.class_path)
 # Get data configuration
 data_config = parse_data_config(opt.data_config_path)
 train_path = data_config["train"]
+img_dir = data_config["img_dir"]
+ann_dir = data_config["ann_dir"]
 
 # Get hyper parameters
 hyperparams = parse_model_config(opt.model_config_path)[0]
@@ -58,8 +60,8 @@ burn_in = int(hyperparams["burn_in"])
 
 # Initiate model
 model = Darknet(opt.model_config_path)
-# model.load_weights(opt.weights_path)
 model.apply(weights_init_normal)
+model.load_weights(opt.weights_path)
 
 if cuda:
     model = model.cuda()
@@ -68,7 +70,7 @@ model.train()
 
 # Get dataloader
 dataloader = torch.utils.data.DataLoader(
-    ListDataset(train_path), batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu
+    ListDataset(train_path, img_dir, ann_dir), batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu
 )
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor

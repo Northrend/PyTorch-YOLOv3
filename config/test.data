@@ -1,0 +1,8 @@
+classes= 80
+train=data/coco/val2017_img.lst
+img_dir=data/coco/val2017/
+ann_dir=data/coco/annotations_darknet_style/
+valid=data/coco/val2017_img.lst
+names=data/coco.names
+backup=backup/
+eval=coco
